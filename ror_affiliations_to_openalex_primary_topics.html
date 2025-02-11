@@ -1,0 +1,1767 @@
+<html>
+<head>
+<title>
+ror_affiliations_to_openalex_primary_topics
+</title>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<!--
+source:295
+-->
+<style>
+table 
+{
+	border-collapse: collapse;
+	border: 1px solid black;
+}
+td 
+{
+	border: 1px solid black;
+	padding: 5px;
+	display: table-cell;
+	vertical-align: top; 
+}
+#graph_spot
+{
+	position: fixed;
+	top: 10%;
+	left:10%;
+	box-shadow: 10px 10px 5px lightgrey;
+    max-height: 1000px;
+	overflow-y:scroll;
+	display:none;
+	background-color:white;
+}
+</style>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<!--
+
+Trois ensembles de fonctions 
+
+==================
+
+Le premier ensemble se déclanche au chargement
+
+Il se compose de :
+- get_ror_affiliation_data_function()
+- launch_ror_function()
+- build_selection_from_node_function()
+
+La fonction de départ est get_ror_affiliation_data_function() (récursive) (asynchrone)
+
+(la fonction launch_ror_function(), déclenchée par le bouton "envoi" ne fait 
+que faire des nettoyages et puis lancer la fonction get_ror_affiliation_data_function())
+
+La fonction get_ror_affiliation_data_function() envoie elle même, get_ror_affiliation_data_function() 
+(c'est sa récursivité)
+
+au dernier passage de cette fonction il y a construction d'un ror_affiliations_tree_step_one qui 
+contient toute l'arborescence ror
+
+alors seulement il y a envoi de la fonction build_selection_from_node_function() (récursive)
+
+cette fonction fabrique la partie ror du formulaire
+
+==================
+
+Le second ensemble de fonctions se déclanche par le bouton "lancer" qui active la fonction 
+launch_openalex_function()
+
+Il se compose de :
+- launch_openalex_function()
+- get_node_function() 
+- harvest_ror_ids_from_node_function()
+- get_openalex_data_thru_affiliation_strings_function()
+- get_openalex_data_thru_ror_ids_function()
+- can_data_function()
+- launch_ending_function()
+- display_openalex_data_function()
+
+launch_openalex_function() (asynchrone) envoie :
+
+get_node_function() (récursive) : à partir de ror_affiliations_tree_step_one (l'aborescence des
+ror) cette fonction construit ror_affiliations_tree_step_two (l'aborescence des ror à 
+partir du ror sélectionné)
+
+puis, quand get_node_function() est épuisée (ie quand elle est allée au bout de sa récursivité),
+launch_openalex_function() envoie harvest_ror_ids_from_node_function() (récursive) 
+
+harvest_ror_ids_from_node_function() construit ror_ids, l'array dans laquelle se trouvent tous 
+les identifiants ror qui intéressent l'utilisateur (et seulement eux, c'est-à-dire pas TOUS 
+les identifiants ror). En effet, elle prend sa source de ror_affiliations_tree_step_two
+qui vient d'être fabriqué par la fonction précédente, get_node_function()
+
+puis, quand harvest_ror_ids_from_node_function() est épuisée (ie quand elle est allée au bout 
+de sa récursivité), launch_openalex_function() envoie, selon ce qu'à tické l'utilisateur, 
+get_openalex_data_thru_affiliation_strings_function(), get_openalex_data_thru_ror_ids_function() 
+ou les deux
+
+get_openalex_data_thru_affiliation_strings_function() et get_openalex_data_thru_ror_ids_function() 
+(asynchrones) (récursives) vont chercher les données dans openalex
+
+Les deux fonctions se comportent de la même façon : 
+
+A chaque résultat trouvé, elles envoient can_data_function()
+
+can_data_function() nourrit deux array (openalex_ids et openalex_sorting) et un objet 
+(openalex_data) contenant des résultats
+
+Quand get_openalex_data_thru_affiliation_strings_function() ET get_openalex_data_thru_ror_ids_function()
+sont toutes les deux épuisées, elles envoient launch_ending_function()
+
+launch_ending_function() met en ordre alphabétique de titre openalex_sorting, envoie 
+display_openalex_data_function() puis effectue un certain nombre de purges
+
+display_openalex_data_function() effectue l'affichage des résultats
+
+==================
+
+Le troisième ensemble de fonctions gère l'affichage des données et des graphes
+
+Il se compose de :
+
+- peek_a_boo_function_01()
+- peek_a_boo_function_02()
+- build_openalex_display_function()
+- breakup_function()
+- show_graph_function()
+- hide_graph_function()
+
+-->
+<!--
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/F9D5ADC0-1EFE-1947-8B58-B1045B397693/main.js" charset="UTF-8"></script></head>
+-->
+<body>
+<h1 style="display:none"></h1>
+<h2 style="display:none">
+Sujets travaillés par les labos
+</h2>
+<div id='other_ror_signpost' style="display: none;">
+
+<!--
+Si vous vous intéressez à une autre institution que <i><span id="institution_name"></span></i>, repérez la
+ dans le <a href="https://ror.org/" target="blanck">ROR</a>
+ et copiez son identifiant (sous la forme https://ror.org/035xkbk20) dans cette fenêtre
+<div id="presentation" style="display: none;">
+<input id="other_ror_id" ></input>
+et cliquez sur&nbsp;<input type="button" onclick="launch_ror_function()" value="envoi"></input>
+-->
+
+Si vous vous intéressez à une autre institution que <i><span id="institution_name"></span></i>, repérez la
+ dans le <a href="https://ror.org/" target="blanck">ROR</a>
+ et copiez son identifiant (sous la forme https://ror.org/05591te55) dans cette fenêtre
+<div id="presentation" style="display: none;">
+<input id="other_ror_id" ></input>
+et cliquez sur&nbsp;<input type="button" onclick="launch_ror_function()" value="envoi"></input>
+
+
+
+
+
+<!--
+</td>
+<button onclick="launch_ror_function()">autre institution</button>
+-->
+</div>
+</div>
+<br/>
+
+<div id="ror_dashboard_spot"></div>
+<div id="ror_form_spot"></div>
+<br/>
+<table id='search_choice' style="display:none;">
+<tr>
+<td>
+Critères de recherche
+</td>
+</tr>
+<tr>
+<td>
+<input id='thru_ror_ids' class='thru_input' type='checkbox' checked></input>
+<label for="thru_ror_ids"> numéros ROR</label><br>
+
+<input id='thru_name' class='thru_input' type='checkbox'></input>
+<label for="thru_name"> nom</label><br>
+<input id='thru_acronyms' class='thru_input' type='checkbox'></input>
+<label for="thru_acronyms"> acronymes</label><br>
+<input id='thru_aliases' class='thru_input' type='checkbox'></input>
+<label for="thru_aliases"> alias</label><br>
+<input id='thru_labels' class='thru_input' type='checkbox'></input>
+<label for="thru_labels"> labels</label><br>
+</td>
+</tr>
+</table>
+<br/>
+<input id='submit_button_02' type='submit' onclick='launch_openalex_function()' style="display: none;" value="lancer"></input>
+<br/>
+
+<div id="openalex_progression_dashboard_spot" style="display:none">
+<br/>
+<table>
+<tr>
+<td>
+<span id="openalex_progression_dashboard_text"></span>&nbsp;:&nbsp;
+<span id="openalex_progression_dashboard_level_found">0</span>&nbsp;notices trouvées
+</td>
+</tr>
+</table>
+</div>
+<div id="openalex_end_result_dashboard_spot" style="display:none"></div>
+<div id="openalex_display_spot"></div>
+<div id="test_spot"></div>
+<br/>
+<div id="graph_spot" style="display:none">
+
+<table>
+<tr>
+<td style="text-align: right;">
+<input type="button" onclick="hide_graph_function()" value="X"></input>
+</td>
+</tr>
+<tr>
+<td>
+<div id="graph_container"></div>
+</td>
+</tr>
+</table>
+<div id="openalex_dashboard_spot_affiliations" style="display:none">
+
+<hr>
+<a href='https://www.uvsq.fr/english' target='_blank'>UVSQ</a>
+/
+<a href='https://www.uvsq.fr/dbist' target='_blank'>DBIST</a>
+
+<script>
+
+var ror_origin_id="https://ror.org/032q5ym94"; //pas de child
+
+var ror_origin_id="https://ror.org/03c3r2d17"; //avec child
+
+var ror_origin_id="https://ror.org/03mkjjy25"; // UVSQ
+
+//var ror_origin_id="https://ror.org/03xjwb503"; // UPS
+
+//var ror_origin_id="https://ror.org/03vek6s52"; // Harvard U
+
+//var ror_origin_id="zzz"; // erreur
+
+
+var ror_affiliations_tree_step_one=new Object();
+var ror_affiliations_tree_step_two=new Array();
+var ror_affiliations_data=new Object();
+var ror_affiliations_sort=new Array();
+var ror_ids=new Array();
+var chuncks_of_ror_ids=new Array();
+var chuncks_of_ror_affiliation_strings=new Array();
+var ror_name=new Object();
+var ror_acronyms=new Object();
+var ror_aliases=new Object();
+var ror_labels=new Object();
+
+var strings_used_in_request=new Array();
+
+var openalex_ids=new Array();
+var openalex_sorting=new Array();
+var openalex_data=new Object();
+
+var openalex_counter={"thru_ror_ids":0,"thru_affiliation_strings":0};
+
+
+var openalex_primary_topic_all_levels_names=new Object();
+var openalex_primary_topic_all_levels_counters=new Object();
+var openalex_primary_topic_all_levels_sorting=new Array();
+
+
+var openalex_primary_topic_concatenation=new Object();
+
+var openalex_primary_topic_missing=0;
+
+var openalex_main_affiliation_name="";
+
+// variables appelées à ne pas bouger
+
+var ror_max_level=0;
+var ror_chunck_size={"ids":6,"strings":6};
+
+var minimum_nbr_of_items_for_graph=24;
+var openalex_graph_attributes=new Object();
+var openalex_graph_buttons_ids=0;
+
+var current_year=new Date().getFullYear();
+var time_span=5;
+
+var starts=0;
+var finishes=0;
+
+var openalex_limit=200; // le maximum = 200
+var timeout_time=200; // 150 OK, en dessous : dangereux
+
+var dashboard_table_width=6;
+
+var status_429_catch_up=false;
+
+
+var display_string_02="";
+
+var openalex_fields=[
+"id",
+"doi",
+"title",
+"display_name",
+"relevance_score",
+"publication_year",
+"publication_date",
+"ids",
+"language",
+"primary_location",
+"type",
+"type_crossref",
+"indexed_in",
+"open_access",
+"authorships",
+"countries_distinct_count",
+"institutions_distinct_count",
+"corresponding_author_ids",
+"corresponding_institution_ids",
+"apc_list",
+"apc_paid",
+"fwci",
+"is_authors_truncated",
+"has_fulltext",
+"fulltext_origin",
+"cited_by_count",
+"citation_normalized_percentile",
+"cited_by_percentile_year",
+"biblio",
+"is_retracted",
+"is_paratext",
+"primary_topic",
+"topics",
+"keywords",
+"concepts",
+"mesh",
+"locations_count",
+"locations",
+"best_oa_location",
+"sustainable_development_goals",
+"grants",
+"datasets",
+"versions",
+"referenced_works_count",
+"referenced_works",
+"related_works",
+"abstract_inverted_index",
+"cited_by_api_url",
+"counts_by_year",
+"updated_date",
+"created_date"
+];
+
+var selection=document.createElement("select");
+selection.id = "affiliations_selection";
+
+var start_year_selection=document.createElement("select");
+start_year_selection.id = "start_year_selection";
+var i=current_year-time_span
+while (i<=current_year)
+{
+	var option = document.createElement("option");
+	option.text = i;
+	option.value = i;
+	start_year_selection.appendChild(option);
+	i++;
+}
+
+var end_year_selection=document.createElement("select");
+end_year_selection.id = "end_year_selection";
+i=current_year
+while (i>=current_year-time_span)
+{
+	var option = document.createElement("option");
+	option.text = i;
+	option.value = i;
+	end_year_selection.appendChild(option);
+	i--;
+}
+
+// infra, advient quand l'usager ouvre la page pour la première fois
+if(document.getElementById("other_ror_id").value=="")
+{
+	ror_affiliations_tree_step_one=new Object();
+	ror_affiliations_tree_step_two=new Array();
+	ror_affiliations_data=new Object();
+	ror_affiliations_sort=new Array();
+	ror_ids=new Array();
+	chuncks_of_ror_ids=new Array();
+	chuncks_of_ror_affiliation_strings=new Array();
+
+	ror_name=new Object();
+	ror_acronyms=new Object();
+	ror_aliases=new Object();
+	ror_labels=new Object();
+	
+	get_ror_affiliation_data_function(ror_origin_id,0);
+}
+
+function peek_a_boo_function_01(class_name)
+{
+	for (let i = 0; i < document.getElementsByClassName(class_name).length; i++) 
+	{
+		if (document.getElementsByClassName(class_name)[i].style.display=="table-cell")	
+		{
+			document.getElementsByClassName(class_name)[i].style.display="none";
+		}
+		else
+		{
+			document.getElementsByClassName(class_name)[i].style.display="table-cell";
+		}
+	}	
+}
+
+function launch_ror_function()
+{
+// purges
+	starts=0;
+	finishes=0;
+	ror_affiliations_tree_step_one=new Object();
+	ror_affiliations_tree_step_two=new Array();
+	ror_affiliations_data=new Object();
+	ror_affiliations_sort=new Array();
+	ror_ids=new Array();
+
+	openalex_ids=new Array();
+	openalex_sorting=new Array();
+	openalex_data=new Object();
+	openalex_primary_topic_all_levels_names=new Object();
+	openalex_primary_topic_all_levels_counters=new Object();
+	openalex_primary_topic_all_levels_sorting=new Array();
+	openalex_primary_topic_concatenation=new Object();
+
+	openalex_primary_topic_missing=0;
+	
+	openalex_counter={"thru_ror_ids":0,"thru_affiliation_strings":0};
+	ror_name=new Object();
+	ror_acronyms=new Object();
+	ror_aliases=new Object();
+	ror_labels=new Object();
+
+	chuncks_of_ror_ids=new Array();
+	chuncks_of_ror_affiliation_strings=new Array();
+
+	strings_used_in_request=new Array();
+	document.getElementById("openalex_progression_dashboard_text").innerHTML="";
+	document.getElementById("openalex_progression_dashboard_level_found").innerHTML=0;
+
+	selection=document.createElement("select");
+	selection.id = "affiliations_selection";
+	
+	var start_year_selection=document.createElement("select");
+	start_year_selection.id = "start_year_selection";
+	var i=current_year-time_span
+	while (i<=current_year)
+	{
+		var option = document.createElement("option");
+		option.text = i;
+		option.value = i;
+		start_year_selection.appendChild(option);
+		i++;
+	}
+
+	var end_year_selection=document.createElement("select");
+	end_year_selection.id = "end_year_selection";
+	i=current_year
+	while (i>=current_year-time_span)
+	{
+		var option = document.createElement("option");
+		option.text = i;
+		option.value = i;
+		end_year_selection.appendChild(option);
+		i--;
+	}
+	ror_origin_id=document.getElementById("other_ror_id").value;
+	get_ror_affiliation_data_function(ror_origin_id,0);
+}
+
+
+async function get_openalex_data_thru_affiliation_strings_function(url,cursor)
+{
+// fonction récursive
+	if (cursor=="*")
+	{
+		document.getElementById("openalex_progression_dashboard_text").innerHTML="recherche par chaînes de caractères";
+		document.getElementById("openalex_progression_dashboard_spot").style.display="block";	
+	}
+	var response="";
+	try 
+	{
+		response = await fetch(url+cursor);
+		if (response.status==429)
+		{
+		}
+	} 
+	catch  
+	{
+	}
+// Uses the 'optional chaining' operator
+	if (response?.ok) 
+	{
+		let response_as_text;
+		try 
+		{
+			response_as_text = await response.text();
+		}
+		catch  
+		{
+		}
+		if (response_as_text!="") 
+		{
+			var response_as_object = JSON.parse(response_as_text);
+
+			can_data_function(response_as_object["results"]);
+			if (response_as_object["meta"]["next_cursor"]!=null)
+			{
+// on ralenti le code			
+				await new Promise(r => setTimeout(r, timeout_time));
+				get_openalex_data_thru_affiliation_strings_function(url,response_as_object["meta"]["next_cursor"]);
+			}
+// ce else pour faire un décompte de chaque fois qu'on est arrivée à la fin d'une série
+			else
+			{
+				openalex_counter["thru_affiliation_strings"]++;
+// si fin des deux thru
+				if (openalex_counter["thru_ror_ids"]==chuncks_of_ror_ids.length && openalex_counter["thru_affiliation_strings"]==chuncks_of_ror_affiliation_strings.length)
+				{
+					launch_ending_function();
+				}
+			}
+		}
+	}
+	else
+// ce else couvre le cas d'un response.status=429, qui n'est pas repéré par le catch
+	{
+		if (status_429_catch_up)
+		{
+// on marque qu'on est arrivé à la fin de la série (en fait, elle a échoué)
+			openalex_counter["thru_affiliation_strings"]++;
+// si fin des deux thru
+			if (openalex_counter["thru_ror_ids"]==chuncks_of_ror_ids.length && openalex_counter["thru_affiliation_strings"]==chuncks_of_ror_affiliation_strings.length)
+			{
+				launch_ending_function();
+			}
+		}
+		else
+		{
+			alert("Echec sur une des requêtes. Veuillez recommencer");
+			location.reload();
+			return;
+		}
+
+	}
+}
+
+async function get_openalex_data_thru_ror_ids_function(url,cursor)
+{
+// Attention : fonction récursive
+	if (cursor=="*")
+	{
+		document.getElementById("openalex_progression_dashboard_text").innerHTML="recherche par identifiants ROR";	
+		document.getElementById("openalex_progression_dashboard_spot").style.display="block";	
+	}
+	var response="";
+	try 
+	{
+		response = await fetch(url+cursor);
+	} 
+	catch  
+	{
+	}
+// Uses the 'optional chaining' operator
+	if (response?.ok) 
+	{
+		let response_as_text;
+		try 
+		{
+			response_as_text = await response.text();
+		}
+		catch  
+		{
+		}
+		if (response_as_text!="") 
+		{
+			var response_as_object = JSON.parse(response_as_text);
+			can_data_function(response_as_object["results"]);
+			if (response_as_object["meta"]["next_cursor"]!=null)
+			{
+// on ralenti le code			
+				await new Promise(r => setTimeout(r, timeout_time));
+				get_openalex_data_thru_ror_ids_function(url,response_as_object["meta"]["next_cursor"]);
+			}
+// ce else pour faire un décompte de chaque fois qu'on est arrivée à la fin d'une série
+			else
+			{
+				openalex_counter["thru_ror_ids"]++;
+// si fin des deux thru
+				if (openalex_counter["thru_ror_ids"]==chuncks_of_ror_ids.length && openalex_counter["thru_affiliation_strings"]==chuncks_of_ror_affiliation_strings.length)
+				{
+					launch_ending_function();
+				}
+			}
+		}
+	}
+	else
+// ce else couvre le cas d'un response.status=429, qui n'est pas repéré par le catch
+	{
+		if (status_429_catch_up)
+		{
+// on marque qu'on est arrivé à la fin de la série (en fait, elle a échoué)
+			openalex_counter["thru_ror_ids"]++;
+// si fin des deux thru
+			if (openalex_counter["thru_ror_ids"]==chuncks_of_ror_ids.length && openalex_counter["thru_affiliation_strings"]==chuncks_of_ror_affiliation_strings.length)
+			{
+				launch_ending_function();
+			}
+		}
+		else
+		{
+			alert("Echec sur une des requêtes. Veuillez recommencer");
+			location.reload();
+			return;
+		}
+	}
+}
+
+function launch_ending_function()
+{
+	document.getElementById("openalex_progression_dashboard_spot").style.display="none";	
+	openalex_sorting.sort((a,b) => (a.title.toLowerCase() > b.title.toLowerCase()) ? 1 : ((b.title.toLowerCase() > a.title.toLowerCase()) ? -1 : 0));
+	display_openalex_data_function();
+// purge :
+	openalex_ids=new Array();
+	openalex_sorting=new Array();
+	openalex_data=new Object();
+	openalex_counter={"thru_ror_ids":0,"thru_affiliation_strings":0};
+	openalex_primary_topic_all_levels_names=new Object();
+	openalex_primary_topic_all_levels_counters=new Object();
+	openalex_primary_topic_all_levels_sorting=new Array();
+	openalex_primary_topic_concatenation=new Object();
+	openalex_primary_topic_missing=0;
+	openalex_graph_attributes=new Object();
+	openalex_graph_buttons_ids=0;
+	openalex_main_affiliation_name="";
+	document.getElementById("submit_button_02").style.display="block";
+	
+}
+
+function can_data_function(results_array)
+{
+	for (var i = 0; i < results_array.length; i++) 
+	{
+		if (openalex_ids.indexOf(results_array[i]["id"])==-1)
+		{
+			openalex_ids.push(results_array[i]["id"]);
+			if (results_array[i]["primary_topic"]!= undefined && results_array[i]["primary_topic"]!= ""  && results_array[i]["primary_topic"]!= null)
+			{
+				if (openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["id"]]==undefined)
+				{
+					if (openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]]==undefined)
+					{
+						openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]]=new Object;
+						openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]]=new Object;
+						openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]][results_array[i]["primary_topic"]["subfield"]["id"]]=new Object;
+					}
+					else
+					{
+						if (openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]]==undefined)
+						{
+							openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]]=new Object;
+							openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]][results_array[i]["primary_topic"]["subfield"]["id"]]=new Object;
+						}
+						else
+						{
+							if (openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]][results_array[i]["primary_topic"]["subfield"]["id"]]==undefined)
+							{
+								openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]][results_array[i]["primary_topic"]["subfield"]["id"]]=new Object;
+							}
+						}
+					}
+					openalex_primary_topic_concatenation[results_array[i]["primary_topic"]["domain"]["id"]][results_array[i]["primary_topic"]["field"]["id"]][results_array[i]["primary_topic"]["subfield"]["id"]][results_array[i]["primary_topic"]["id"]]="AAA"
+
+					openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["id"]]=results_array[i]["primary_topic"]["display_name"];
+					openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["id"]]=0;
+
+					if (openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["subfield"]["id"]]==undefined)
+					{
+
+						openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["subfield"]["id"]]=results_array[i]["primary_topic"]["subfield"]["display_name"];
+						openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["subfield"]["id"]]=0;
+
+					}
+					if (openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["field"]["id"]]==undefined)
+					{
+
+						openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["field"]["id"]]=results_array[i]["primary_topic"]["field"]["display_name"];
+						openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["field"]["id"]]=0;
+					}
+					if (openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["domain"]["id"]]==undefined)
+					{
+
+						openalex_primary_topic_all_levels_names[results_array[i]["primary_topic"]["domain"]["id"]]=results_array[i]["primary_topic"]["domain"]["display_name"];
+						openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["domain"]["id"]]=0;
+					}
+									
+				}
+				openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["id"]]++;
+				openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["subfield"]["id"]]++;
+				openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["field"]["id"]]++;
+				openalex_primary_topic_all_levels_counters[results_array[i]["primary_topic"]["domain"]["id"]]++;
+			}
+			else
+			{
+				openalex_primary_topic_missing++;
+			}
+			var provisional_title="";
+			if (results_array[i]["title"] == null)
+			{
+				provisional_title="VIDE";
+			}
+			else
+			{
+				provisional_title=results_array[i]["title"];
+			}
+		}
+	}
+}
+
+
+function build_openalex_display_function(obj,topic_id,openalex_long_title)
+{
+	var provisional_openalex_primary_topic_sorting=new Array();
+	var provisional_openalex_primary_topic_sorting_by_name=new Array();
+	var provisional_openalex_primary_topic_node=new Object();
+	var provisional_openalex_primary_topic_sorting_by_rank=new Array();
+	var provisional_openalex_primary_topic_sorting_by_rank_tool_01=new Array();
+	var provisional_openalex_primary_topic_sorting_by_rank_tool_02=new Object();
+	for (const [key, value] of Object.entries(obj)) 
+	{	
+		if (openalex_primary_topic_all_levels_names[key]!=undefined)
+		{
+			if (provisional_openalex_primary_topic_sorting_by_rank_tool_01.indexOf(openalex_primary_topic_all_levels_counters[key])==-1)
+			{
+				provisional_openalex_primary_topic_sorting_by_rank_tool_01.push(openalex_primary_topic_all_levels_counters[key]);
+			}
+			if (provisional_openalex_primary_topic_sorting_by_rank_tool_02[openalex_primary_topic_all_levels_counters[key]]==undefined)
+			{
+				provisional_openalex_primary_topic_sorting_by_rank_tool_02[openalex_primary_topic_all_levels_counters[key]]=new Array();
+			}
+			provisional_openalex_primary_topic_sorting_by_rank_tool_02[openalex_primary_topic_all_levels_counters[key]].push({"display_name":openalex_primary_topic_all_levels_names[key],"id":key});
+
+			provisional_openalex_primary_topic_sorting_by_name.push({"display_name":openalex_primary_topic_all_levels_names[key],"id":key});
+			if (value.constructor === Object)
+			{
+				provisional_openalex_primary_topic_node[key]=value
+			}
+		}
+	}
+	provisional_openalex_primary_topic_sorting_by_rank_tool_01.sort((function(a, b){return b-a}));
+	for (var i = 0; i < provisional_openalex_primary_topic_sorting_by_rank_tool_01.length; i++) 
+	{
+		for (var j = 0; j < provisional_openalex_primary_topic_sorting_by_rank_tool_02[provisional_openalex_primary_topic_sorting_by_rank_tool_01[i]].length; j++) 
+		{
+			provisional_openalex_primary_topic_sorting_by_rank.push(provisional_openalex_primary_topic_sorting_by_rank_tool_02[provisional_openalex_primary_topic_sorting_by_rank_tool_01[i]][j]);
+		}
+	}
+	provisional_openalex_primary_topic_sorting_by_name.sort((a,b) => (a.display_name.toLowerCase() > b.display_name.toLowerCase()) ? 1 : ((b.display_name.toLowerCase() > a.display_name.toLowerCase()) ? -1 : 0));
+
+	var provisional_flag=false;
+	display_string_02+="<td class='";
+	display_string_02+=topic_id;
+	display_string_02+="'";
+	if (topic_id==0)
+	{
+		display_string_02+=" style='display:block'";
+	}
+	else
+	{
+		display_string_02+=" style='display:none'";
+	}
+	display_string_02+=">";
+// c'est ici que se décide si l'on classe les topic par nom ou par nombre de résultats
+//	provisional_openalex_primary_topic_sorting=provisional_openalex_primary_topic_sorting_by_name;
+	provisional_openalex_primary_topic_sorting=provisional_openalex_primary_topic_sorting_by_rank;
+
+	var provisional_values=new Array();
+	var provisional_labels=new Array();
+	var provisional_nbr_of_items=0;
+	for (var i = 0; i < provisional_openalex_primary_topic_sorting.length; i++) 
+	{
+		if (provisional_flag)
+		{
+			display_string_02+="<br/>";
+		}
+		provisional_flag=true;
+		display_string_02+="<table>";
+		display_string_02+="<tr>";
+		display_string_02+="<td>";
+		display_string_02+=provisional_openalex_primary_topic_sorting[i]["display_name"];
+		display_string_02+="&nbsp;[";
+		display_string_02+=openalex_primary_topic_all_levels_counters[provisional_openalex_primary_topic_sorting[i]["id"]];			
+		display_string_02+="&nbsp;notices]";
+		provisional_nbr_of_items=provisional_nbr_of_items+openalex_primary_topic_all_levels_counters[provisional_openalex_primary_topic_sorting[i]["id"]];
+		if (typeof provisional_openalex_primary_topic_node[provisional_openalex_primary_topic_sorting[i]["id"]] === "object")
+		{
+			display_string_02+="&nbsp;";
+			display_string_02+="<input id='submit_button_";
+			display_string_02+=provisional_openalex_primary_topic_sorting[i]["id"];
+			display_string_02+="' ";
+			display_string_02+="type=submit onclick=peek_a_boo_function_02('";
+			display_string_02+=provisional_openalex_primary_topic_sorting[i]["id"];
+			display_string_02+="') value='>>>'>";
+			display_string_02+="</input>";
+		}
+		display_string_02+="</td>";
+		if (typeof provisional_openalex_primary_topic_node[provisional_openalex_primary_topic_sorting[i]["id"]] === "object")
+		{
+			build_openalex_display_function(provisional_openalex_primary_topic_node[provisional_openalex_primary_topic_sorting[i]["id"]],provisional_openalex_primary_topic_sorting[i]["id"],openalex_long_title+"<br>"+">"+breakup_function(provisional_openalex_primary_topic_sorting[i]["display_name"])+"<");
+		}
+		display_string_02+="</tr>";
+		display_string_02+="</table>";
+		provisional_values.push(openalex_primary_topic_all_levels_counters[provisional_openalex_primary_topic_sorting[i]["id"]]);
+		provisional_labels.push(provisional_openalex_primary_topic_sorting[i]["display_name"]);
+	}
+// on n'affiche le bouton d'appel du graphe que s'il y a suffisamment de résultats
+	if (provisional_nbr_of_items>=minimum_nbr_of_items_for_graph)
+	{
+		var provisional_id="graph_button_id_"+openalex_graph_buttons_ids;
+		display_string_02+="<br/>";
+		display_string_02+="<input type='button' id='"+provisional_id+"' value='afficher le graphe'></input>";
+		openalex_graph_attributes[openalex_graph_buttons_ids]={"values":provisional_values,"labels":provisional_labels,"title":openalex_long_title};
+		openalex_graph_buttons_ids++;
+	}
+	display_string_02+="</td>";
+}
+
+
+function breakup_function(one_string)
+{
+	var provisional_limit=50;
+	var bit=one_string;
+	var string_takencareof="";
+	while (one_string.length>provisional_limit)
+	{
+		bit=one_string.substring(0, provisional_limit);
+		if (bit.lastIndexOf(" ")!=-1)
+		{
+			bit=bit.slice(0,bit.lastIndexOf(" "))+"<br>"+bit.slice(bit.lastIndexOf(" ")+1)
+		}
+		one_string=one_string.substring(provisional_limit);
+		string_takencareof=string_takencareof+bit;
+	}
+	string_takencareof=string_takencareof+one_string;
+	return string_takencareof;
+}
+
+function peek_a_boo_function_02(topic_id)
+{
+	var provisional_id="submit_button_"+topic_id;
+	var provisional_value=">>>";
+	if (document.getElementById(provisional_id).value==">>>")
+	{
+		provisional_value="<<<";
+	}
+	document.getElementById(provisional_id).value=provisional_value;
+	var provisional_display="block";
+	for (var i = 0; i < document.getElementsByClassName(topic_id).length; i++) 
+	{
+		if (i==0)
+		{
+			if (document.getElementsByClassName(topic_id)[i].style.display=="block")
+			{
+				provisional_display="none";
+			}
+		}
+		document.getElementsByClassName(topic_id)[i].style.display=provisional_display;
+	}
+
+}
+
+function display_openalex_data_function()
+{
+
+
+	if (document.getElementById("thru_ror_ids").checked == true)
+	{
+		var provisional_table = document.createElement('table');
+		var provisional_tr = document.createElement('tr');
+		var provisional_td = document.createElement('td');
+		if (ror_ids.length<dashboard_table_width)
+		{
+			provisional_td.setAttribute("colspan", ror_ids.length);
+		}
+		else
+		{
+			provisional_td.setAttribute("colspan", dashboard_table_width);
+		}
+		provisional_td.innerHTML+="numéros ROR recherchés&nbsp;";
+		var provisional_input=document.createElement("input");
+		provisional_input.type="submit";
+		provisional_input.value="afficher/désafficher";
+		provisional_input.setAttribute("onclick", "peek_a_boo_function_01('ror_ids_seeked')");
+		provisional_td.appendChild(provisional_input);
+		provisional_tr.appendChild(provisional_td);	
+		provisional_table.appendChild(provisional_tr);	
+		var provisional_tr = document.createElement('tr');
+		for (var i = 0; i < ror_ids.length; i++) 
+		{
+			var provisional_td = document.createElement('td');
+			provisional_td.innerHTML=ror_ids[i];
+			provisional_td.setAttribute("class", "ror_ids_seeked");
+			provisional_td.style.display="none";
+			provisional_tr.appendChild(provisional_td);	
+			if ((i+1)/dashboard_table_width==Math.trunc((i+1)/dashboard_table_width))
+			{
+				provisional_table.appendChild(provisional_tr);
+				provisional_tr = document.createElement('tr');				
+			}
+		}
+		provisional_table.appendChild(provisional_tr);	
+		document.getElementById("openalex_display_spot").appendChild(provisional_table);
+		document.getElementById("openalex_display_spot").innerHTML+="<br/><br/>";
+	}
+	
+	if (
+	document.getElementById("thru_name").checked == true
+	|| 
+	document.getElementById("thru_acronyms").checked == true
+	|| 
+	document.getElementById("thru_aliases").checked == true
+	|| 
+	document.getElementById("thru_labels").checked == true 
+	)
+	{
+		var provisional_table = document.createElement('table');
+		var provisional_tr = document.createElement('tr');
+		var provisional_td = document.createElement('td');
+		if (strings_used_in_request.length<dashboard_table_width)
+		{
+			provisional_td.setAttribute("colspan", strings_used_in_request.length);
+		}
+		else
+		{
+			provisional_td.setAttribute("colspan", dashboard_table_width);
+		}
+		provisional_td.innerHTML+="chaînes recherchés dans les affiliations&nbsp;";
+		var provisional_input=document.createElement("input");
+		provisional_input.type="submit";
+		provisional_input.value="afficher/désafficher";
+		provisional_input.setAttribute("onclick", "peek_a_boo_function_01('ror_affiliation_strings_seeked')");
+		provisional_td.appendChild(provisional_input);
+		provisional_tr.appendChild(provisional_td);	
+		provisional_table.appendChild(provisional_tr);	
+		var provisional_tr = document.createElement('tr');
+		for (var i = 0; i < strings_used_in_request.length; i++) 
+		{
+			var provisional_td = document.createElement('td');
+			provisional_td.innerHTML=strings_used_in_request[i];
+			provisional_td.setAttribute("class", "ror_affiliation_strings_seeked");
+			provisional_td.style.display="none";
+			provisional_tr.appendChild(provisional_td);	
+			if ((i+1)/dashboard_table_width==Math.trunc((i+1)/dashboard_table_width))
+			{
+				provisional_table.appendChild(provisional_tr);
+				provisional_tr = document.createElement('tr');				
+			}
+		}
+		provisional_table.appendChild(provisional_tr);	
+		document.getElementById("openalex_display_spot").appendChild(provisional_table);
+		document.getElementById("openalex_display_spot").innerHTML+="<br/><br/>";
+	}
+// strings_used_in_request inutile désormais, on le vide 
+	strings_used_in_request=new Array();
+
+
+
+
+
+
+
+	document.getElementById("openalex_dashboard_spot_affiliations").style.display="none";
+	document.getElementById("submit_button_02").style.display="block";
+	display_string_02+="<br/>";
+	display_string_02+="<table>";
+	display_string_02+="<tr>";
+	display_string_02+="<td>";
+//	display_string_02+="terminé :";
+	display_string_02+=openalex_ids.length;
+	display_string_02+=" notices";
+	display_string_02+="</td>";
+	display_string_02+="</tr>";
+	if (openalex_ids.length>0)
+	{
+		display_string_02+="<tr>";
+		display_string_02+="<td>";
+		display_string_02+="dont&nbsp;";
+		display_string_02+=openalex_ids.length-openalex_primary_topic_missing;
+		display_string_02+="&nbsp;où la donnée <i>primary topic</i> figure";
+//		display_string_02+="nombre de notices où la donnée <i>primary topic</i> ne figure pas :";
+//		display_string_02+=openalex_primary_topic_missing;
+		display_string_02+="</td>";
+		display_string_02+="</tr>";
+		display_string_02+="</table>";	
+		display_string_02+="<br/>";
+		display_string_02+="<table>";
+		display_string_02+="<tr>";
+		var provisional_affiliation_name=document.getElementById("institution_name").innerHTML;
+		if (openalex_main_affiliation_name!="")
+		{
+			provisional_affiliation_name=openalex_main_affiliation_name;
+		}
+		build_openalex_display_function(openalex_primary_topic_concatenation,0,breakup_function(provisional_affiliation_name));
+		display_string_02+="</tr>";
+	}
+	display_string_02+="</table>";
+	display_string_02+="<br/>";
+	document.getElementById("openalex_display_spot").innerHTML+=display_string_02+"<br/><br/>";
+	for (const [key_03, value_03] of Object.entries(openalex_graph_attributes)) 
+	{
+		var provisional_id="graph_button_id_"+key_03;
+		document.getElementById(provisional_id).addEventListener("click", function() {
+    	show_graph_function(value_03["values"],value_03["labels"],value_03["title"]);
+		}, false);
+	}
+
+// purge
+	display_string_02="";
+	
+}
+
+async function launch_openalex_function()
+{
+// pour s'assurer que l'utilisateur a tické au moins un checkbox
+	var thru_flag=true;
+	for (var j = 0; j < document.getElementsByClassName("thru_input").length; j++) 
+	{
+		if (document.getElementsByClassName("thru_input")[j].checked == true)
+		{
+			thru_flag=false;
+			break;
+		}
+	}
+	if (thru_flag)
+	{
+		document.getElementById("submit_button_02").style.display="block";
+		alert("tickez au moins un choix");
+	}
+	else
+	{
+		document.getElementById("submit_button_02").style.display="none";
+	}
+
+// pour le cas où la fonction est lancée pour une seconde fois ou plus,
+// purge : 
+	openalex_ids=new Array();
+	openalex_sorting=new Array();
+	openalex_data=new Object();
+	openalex_counter={"thru_ror_ids":0,"thru_affiliation_strings":0};
+	ror_affiliations_data=new Object();
+	ror_affiliations_sort=new Array();
+	ror_ids=new Array();
+	chuncks_of_ror_ids=new Array();
+	chuncks_of_ror_affiliation_strings=new Array();
+
+	document.getElementById("openalex_progression_dashboard_text").innerHTML="";
+	document.getElementById("openalex_progression_dashboard_level_found").innerHTML=0;
+
+	document.getElementById("openalex_display_spot").innerHTML = "";
+	document.getElementById("openalex_end_result_dashboard_spot").innerHTML="";
+	document.getElementById("openalex_end_result_dashboard_spot").style.display="none";
+
+	ror_affiliations_tree_step_two=new Array();
+
+	get_node_function(document.getElementById("affiliations_selection").value,ror_affiliations_tree_step_one);
+	harvest_ror_ids_from_node_function(ror_affiliations_tree_step_two);
+	var ror_strings=new Array();
+// on nourrit ror_strings selon la demande
+	if (document.getElementById("thru_name").checked == true)
+	{
+		var provisional_ror_name_list=new Array();
+		for (var j = 0; j < ror_ids.length; j++) 
+		{
+			if (ror_name[ror_ids[j]]!=undefined)
+			{
+				if (ror_name[ror_ids[j]]!="")
+				{
+					for (var k = 0; k < ror_name[ror_ids[j]].length; k++) 
+					{
+						provisional_ror_name_list.push(ror_name[ror_ids[j]][k]);
+					}
+				}
+			}
+		}
+		ror_strings = ror_strings.concat(provisional_ror_name_list);
+	}
+	if (document.getElementById("thru_acronyms").checked == true)
+	{
+		var provisional_ror_acronyms_list=new Array();
+		for (var j = 0; j < ror_ids.length; j++) 
+		{
+			if (ror_acronyms[ror_ids[j]]!=undefined)
+			{
+				if (ror_acronyms[ror_ids[j]]!="")
+				{
+					for (var k = 0; k < ror_acronyms[ror_ids[j]].length; k++) 
+					{
+						provisional_ror_acronyms_list.push(ror_acronyms[ror_ids[j]][k]);
+					}
+				}
+			}
+		}
+		ror_strings = ror_strings.concat(provisional_ror_acronyms_list);
+	}
+	if (document.getElementById("thru_aliases").checked == true)
+	{
+		var provisional_ror_aliases_list=new Array();
+		for (var j = 0; j < ror_ids.length; j++) 
+		{
+			if (ror_aliases[ror_ids[j]]!=undefined)
+			{
+				if (ror_aliases[ror_ids[j]]!="")
+				{
+					for (var k = 0; k < ror_aliases[ror_ids[j]].length; k++) 
+					{
+						provisional_ror_aliases_list.push(ror_aliases[ror_ids[j]][k]);
+					}
+				}
+			}
+		}
+		ror_strings = ror_strings.concat(provisional_ror_aliases_list);
+	}
+	if (document.getElementById("thru_labels").checked == true)
+	{
+		var provisional_ror_labels_list=new Array();
+		for (var j = 0; j < ror_ids.length; j++) 
+		{
+			if (ror_labels[ror_ids[j]]!=undefined)
+			{
+				if (ror_labels[ror_ids[j]]!="")
+				{
+					for (var k = 0; k < ror_labels[ror_ids[j]].length; k++) 
+					{
+						provisional_ror_labels_list.push(ror_labels[ror_ids[j]][k]);
+					}
+				}
+			}
+		}
+		ror_strings = ror_strings.concat(provisional_ror_labels_list);
+	}
+// s'il y a quelque chose dans ror_strings, il faut lancer la recherche
+	if (ror_strings.length!=0)
+	{
+// on dispatche les strings présents dans ror_strings en lots dans chuncks_of_ror_affiliation_strings
+		var i=0;
+		var k=0;
+		var provisional_chunck_of_rors=new Array();
+		for (var j = 0; j < ror_strings.length; j++) 
+		{
+			provisional_chunck_of_rors.push(ror_strings[j]);
+			if (k==ror_chunck_size["strings"]-1)
+			{
+				chuncks_of_ror_affiliation_strings.push(provisional_chunck_of_rors);
+				provisional_chunck_of_rors=new Array();
+				k=0;
+			}
+			k++;
+		}
+// pour le dernier, si nécessaire
+		if (provisional_chunck_of_rors.length!=0)
+		{
+			chuncks_of_ror_affiliation_strings.push(provisional_chunck_of_rors);
+		}
+// recherche par les strings d'affiliations ror 
+		if (chuncks_of_ror_affiliation_strings.length!=0)
+		{
+			var i=0;
+			while (i<chuncks_of_ror_affiliation_strings.length)
+			{
+// on ralenti le code
+				await new Promise(r => setTimeout(r, timeout_time));
+//https://api.openalex.org/works?filter=raw_affiliation_strings.search:("ur 4455" OR "ur4455" OR "cearc" OR "'Cultures' AND 'Environnements' AND 'Arctique' AND 'Représentations' AND 'Climat'"),from_publication_date:2017-01-01,to_publication_date:2025-12-31&per-page=200
+				var URL="https://api.openalex.org/works?filter=";
+				URL+="raw_affiliation_strings.search:";
+				URL+="(";
+
+				for (var j = 0; j < chuncks_of_ror_affiliation_strings[i].length; j++) 
+				{
+					if (j!=0)
+					{
+						URL+=" OR ";
+					}
+// si le chuncks_of_ror_affiliation_strings[i][j] est encadré de parenthèses, c'est
+// que, plus haut, on l'a dédoupé en bouts avec ajout de "AND". Dans le cas, il ne
+// faut pas, ici, l'encadrer de "
+
+
+					var provisional_affiliation_string=chuncks_of_ror_affiliation_strings[i][j];
+
+					if (provisional_affiliation_string.substring(0,1)=='(' && provisional_affiliation_string.substring(provisional_affiliation_string.length-1)==")")
+					{
+						URL+=provisional_affiliation_string;
+					}
+					else
+					{
+						URL+='"';
+						URL+=provisional_affiliation_string;
+						URL+='"';
+					}
+					strings_used_in_request.push(provisional_affiliation_string);
+				}
+				URL+=")";
+				URL+=",from_publication_date:"+document.getElementById("start_year_selection").value+"-01-01,to_publication_date:"+document.getElementById("end_year_selection").value+"-12-31";
+				URL+="&select=";
+				for (var j = 0; j < openalex_fields.length; j++) 
+				{
+					if (j!=0)
+					{
+						URL+=",";
+					}	
+					URL+=openalex_fields[j];
+				}
+				URL+="&per-page="+openalex_limit;
+				URL+="&cursor=";
+				get_openalex_data_thru_affiliation_strings_function(URL,"*");
+				i++;
+			}
+		}
+	}
+// ce else = cas où il n'y a rien dans ror_strings
+	else
+	{
+		chuncks_of_ror_affiliation_strings=[];
+		openalex_counter["thru_affiliation_strings"]=0;
+// si l'utilisateur n'a pas demandé de recherche par ror id
+		if (document.getElementById("thru_ror_ids").checked == false)
+		{
+			document.getElementById("submit_button_02").style.display="block";
+			alert("Aucun élément de recherche reconnu. Veuillez modifier votre requête en tickant un autre choix");
+		}
+	}
+
+// si correspond à la demande
+	if (document.getElementById("thru_ror_ids").checked == true)
+	{
+
+// on dispatche les ids présentes dans ror_ids en lots dans chuncks_of_ror_ids
+		var i=0;
+		var k=0;
+		for (var j = 0; j < ror_ids.length; j++) 
+		{
+			k++;
+			if(chuncks_of_ror_ids[i]==undefined)
+			{
+				chuncks_of_ror_ids[i]=new Array();
+			}
+			chuncks_of_ror_ids[i].push(ror_ids[j]);
+			if (k==ror_chunck_size["ids"])
+			{
+				i++;
+				k=0;
+			}
+		}
+	
+// recherche par les numéros ror
+		if (chuncks_of_ror_ids.length!=0)
+		{
+			var i=0;
+			while (i<chuncks_of_ror_ids.length)
+			{
+// on ralenti le code
+				await new Promise(r => setTimeout(r, timeout_time));
+				var URL="https://api.openalex.org/works?filter=";
+				URL+="authorships.institutions.ror:";
+				for (var j = 0; j < chuncks_of_ror_ids[i].length; j++) 
+				{
+					if (j!=0)
+					{
+						URL+="|";
+					}
+					URL+=chuncks_of_ror_ids[i][j];
+				}
+				URL+=",from_publication_date:"+document.getElementById("start_year_selection").value+"-01-01,to_publication_date:"+document.getElementById("end_year_selection").value+"-12-31";
+				URL+="&select=";
+				for (var j = 0; j < openalex_fields.length; j++) 
+				{
+					if (j!=0)
+					{
+						URL+=",";
+					}	
+					URL+=openalex_fields[j];
+				}
+				URL+="&per-page="+openalex_limit;
+				URL+="&cursor=";
+				get_openalex_data_thru_ror_ids_function(URL,"*");
+				i++;
+			}
+		}
+	}
+// ce else = cas où ça ne correspond pas à la demande
+	else
+	{
+		chuncks_of_ror_ids=[];
+		openalex_counter["thru_ror_ids"]=0;
+	}
+}
+
+async function get_ror_affiliation_data_function(one_ror_affiliation_id,level)
+{
+// Fonction récursive
+// la fonction prend un numéro de structure Hal et un niveau
+// elle va chercher les numéros de structures Hal juste "en dessous" de la structure qui nous intéresse
+// (ils se trouvent dans relashionships)
+// ces numéros, on les classe par ordre alphabétique de noms correspondant
+// puis on les stocke dans une variable ror_affiliations_tree_step_one[level]
+// paralèllement, on stocke les name, acronyms, labels, aliases dans les objets ad-hoc
+// puis pour chaque numéro, on relance la fonction, avec comme attribut le numéro et le level, + 1
+
+// la dernière fois qu'il y a occurence de cette fonction, une dernière manip qui permet que
+// ror_affiliations_tree_step_one contienne une arboresence de toutes les institutions ror et que cela
+// ror_affiliations_tree_step_one ressemble, par exemple, à cela
+// {"https://ror.org/03c3r2d17":[{"https://ror.org/01mcvy510":[]},{"https://ror.org/04mh52z70":[]}]}
+
+// décompte le fait que la fonction est lancée
+	starts++;
+// mise à jour de ror_max_level
+	if (level>ror_max_level)
+	{
+		ror_max_level=level;
+	}
+	var URL="https://api.ror.org/organizations/"+one_ror_affiliation_id;
+	var response="";
+	var flag=true;
+	try 
+	{
+		response = await fetch(URL);
+		if (response.status==404)
+		{
+			flag=false;
+		}
+	} 
+	catch  
+	{
+	}
+// Uses the 'optional chaining' operator
+
+	if (response?.ok) 
+	{
+		let response_as_text;
+		try 
+		{
+			response_as_text = await response.text();
+		}
+// il s'agit de sidestep une erreur qui arrive de temps en temps 
+// sur results_as_object_hal["response"]["numFound"]
+		catch  
+		{
+		}
+		if (response_as_text!="") 
+		{
+			if (response_as_text.substring(0, 10)!="cURL error") 
+			{
+				var response_as_object = JSON.parse(response_as_text);
+				if (response_as_object["name"]!=undefined)
+				{
+					if (ror_name[one_ror_affiliation_id]==undefined)
+					{
+						ror_name[one_ror_affiliation_id]=new Array();
+					}
+
+					var provisional_name=response_as_object["name"];
+					
+					if (provisional_name.indexOf(", ")!=-1 || provisional_name.indexOf(",")!=-1 || provisional_name.indexOf("&")!=-1)
+					{
+						provisional_name= provisional_name.replaceAll(", ","' AND '");
+						provisional_name= provisional_name.replaceAll(",","' AND '");
+						provisional_name= provisional_name.replaceAll("&","' AND '");
+						provisional_name="('"+provisional_name+"')";
+					}
+					
+					ror_name[one_ror_affiliation_id].push(provisional_name);
+//					ror_name[one_ror_affiliation_id].push(response_as_object["name"]);
+				}
+				if (response_as_object["acronyms"]!=undefined)
+				{
+					if (ror_acronyms[one_ror_affiliation_id]==undefined)
+					{
+						ror_acronyms[one_ror_affiliation_id]=new Array();
+					}
+					for (var j = 0; j < response_as_object["acronyms"].length; j++) 
+					{
+						ror_acronyms[one_ror_affiliation_id].push(response_as_object["acronyms"][j]);
+					}
+				}
+				var response_as_object = JSON.parse(response_as_text);
+				if (response_as_object["aliases"]!=undefined)
+				{
+					if (ror_aliases[one_ror_affiliation_id]==undefined)
+					{
+						ror_aliases[one_ror_affiliation_id]=new Array();
+					}
+					for (var j = 0; j < response_as_object["aliases"].length; j++) 
+					{
+						var provisional_aliases=response_as_object["aliases"][j];
+						if (provisional_aliases.indexOf(", ")!=-1 || provisional_aliases.indexOf(",")!=-1  || provisional_aliases.indexOf("&")!=-1)
+						{
+							provisional_aliases= provisional_aliases.replaceAll(", ","' AND '");
+							provisional_aliases= provisional_aliases.replaceAll(",","' AND '");
+							provisional_aliases= provisional_aliases.replaceAll("&","' AND '");
+							provisional_aliases="('"+provisional_aliases+"')";
+						}
+						ror_aliases[one_ror_affiliation_id].push(provisional_aliases);
+					}
+				}
+				if (response_as_object["labels"]!=undefined)
+				{
+					if (ror_labels[one_ror_affiliation_id]==undefined)
+					{
+						ror_labels[one_ror_affiliation_id]=new Array();
+					}
+					for (var j = 0; j < response_as_object["labels"].length; j++) 
+					{
+						var provisional_labels=response_as_object["labels"][j]["label"];
+						if (provisional_labels.indexOf(", ")!=-1 || provisional_labels.indexOf(",")!=-1 || provisional_labels.indexOf("&")!=-1 )
+						{
+							provisional_labels= provisional_labels.replaceAll(", ","' AND '");
+							provisional_labels= provisional_labels.replaceAll(",","' AND '");
+							provisional_labels= provisional_labels.replaceAll("&","' AND '");
+							provisional_labels="('"+provisional_labels+"')";
+						}
+						ror_labels[one_ror_affiliation_id].push(provisional_labels);
+					}
+				}
+				if (response_as_object["relationships"]!=undefined)
+				{
+
+// si on se trouve au premier niveau, affichage
+					if (level==0)
+					{
+						document.getElementById("institution_name").innerHTML = response_as_object["name"];
+						document.getElementsByTagName("h1")[0].innerHTML = response_as_object["name"]+"@OpenAlex";
+						document.getElementsByTagName("h1")[0].style.display="block";
+						document.getElementsByTagName("h2")[0].style.display="block";
+						document.getElementById("presentation").style.display="block";
+					}
+
+// on construit une array ror_affiliations_tree_step_one[level][one_ror_affiliation_id]
+					if (ror_affiliations_tree_step_one[level]==undefined)
+					{
+						ror_affiliations_tree_step_one[level]=new Object();
+					}
+					if (ror_affiliations_tree_step_one[level][one_ror_affiliation_id]==undefined)
+					{
+						ror_affiliations_tree_step_one[level][one_ror_affiliation_id]=new Array();
+					}
+// on passe en revue les relationships et on les stocke dans ror_affiliations_data
+// et on fabrique un ror_affiliations_sort
+					for (var j = 0; j < response_as_object["relationships"].length; j++) 
+					{
+						if (ror_affiliations_data[response_as_object["relationships"][j]["id"]]==undefined)
+						{
+							ror_affiliations_data[response_as_object["relationships"][j]["id"]]=new Object();
+						}
+						ror_affiliations_data[response_as_object["relationships"][j]["id"]]={"id":response_as_object["relationships"][j]["id"],"type":response_as_object["relationships"][j]["type"],"label":response_as_object["relationships"][j]["label"]};
+						ror_affiliations_sort.push({"id":response_as_object["relationships"][j]["id"],"label":response_as_object["relationships"][j]["label"],"type":response_as_object["relationships"][j]["type"]});
+					}
+// sort par nom
+					ror_affiliations_sort.sort((a,b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0));
+// on passe en revue le ror_affiliations_sort juste obtenu
+					for (var j = 0; j < ror_affiliations_sort.length; j++) 
+					{
+// s'il s'agit d'un child...
+						if (ror_affiliations_sort[j]["type"]=="Child")
+						{
+							ror_affiliations_tree_step_one[level][one_ror_affiliation_id].push(ror_affiliations_sort[j]["id"]);
+							get_ror_affiliation_data_function(ror_affiliations_sort[j]["id"],level+1);
+						}
+					}
+//purge du ror_affiliations_sort
+					ror_affiliations_sort=new Array();
+
+				}
+			}
+// décompte le fait que la fonction est terminée (après les await). Cas du succèes (try OK)
+			finishes++;
+// on est arrivé à la fin
+			if (starts==finishes)
+			{
+// alors on passe en revue ror_affiliations_tree_step_one en commençant par le level le plus grand
+// on attrape ce qu'on trouve à chaque level et on le copie au niveau inférieur
+/* exemple, on a ceci, ou le level de niveau inférieur est 1
+
+0	
+	1005010	
+		0	541821
+		1	408246
+1	
+	541821	
+		0	541828
+		1	541829
+		2	541826
+		3	541827
+		4	541822
+		5	541830
+		6	541825
+		7	541823
+
+on passe à ça
+
+0
+	1005010	
+		0	541821	
+			0	541828
+			1	541829
+			2	541826
+			3	541827
+			4	541822
+			5	541830
+			6	541825
+			7	541823
+		1	408246
+
+*/
+				while (level>0)
+				{
+					if (ror_affiliations_tree_step_one[level]!=undefined)
+					{
+						for (const [key_01, value_01] of Object.entries(ror_affiliations_tree_step_one[level])) 
+						{
+							for (const [key_02, value_02] of Object.entries(ror_affiliations_tree_step_one[level-1])) 
+							{
+								for (let i = 0; i < value_02.length; i++) 
+								{
+									if (value_02[i]==key_01)
+									{
+										ror_affiliations_tree_step_one[level-1][key_02][i]={[key_01]:ror_affiliations_tree_step_one[level][key_01]};
+									}
+								}
+							}
+						}
+					}
+					level--;
+				}
+
+// l'opération terminée, toute la hiérarchie est regroupée dans le level=0 de ror_affiliations_tree_step_one
+// du coup on ne s'intéresse plus qu'à ce niveau là
+				ror_affiliations_tree_step_one=ror_affiliations_tree_step_one[0];
+				var sub_affiliation_id=0;
+				sub_affiliation_id=ror_origin_id;
+				build_selection_from_node_function(ror_affiliations_tree_step_one,0);
+
+				document.getElementById("ror_form_spot").innerHTML=selection.outerHTML;
+				document.getElementById("ror_form_spot").innerHTML+="<br/><br/>";
+				document.getElementById("ror_form_spot").innerHTML+="année de départ&nbsp;";
+				document.getElementById("ror_form_spot").innerHTML+=start_year_selection.outerHTML;
+				document.getElementById("ror_form_spot").innerHTML+="  année de fin&nbsp;";
+				document.getElementById("ror_form_spot").innerHTML+=end_year_selection.outerHTML;
+				document.getElementById("search_choice").style.display="block";
+				document.getElementById("submit_button_02").style.display="block";
+				document.getElementById("other_ror_signpost").style.display="block";
+// purge
+				starts=0;
+				finishes=0;
+			}
+		}
+	}
+// ce else couvre le cas d'une erreur genre 404
+	else
+	{
+		alert (Error(response.statusText)+"\n\r"+"rechargez manuellement la page et reessayez");
+		return;
+	}
+}
+
+
+function harvest_ror_ids_from_node_function(node)
+{
+// Attention : fonction récursive
+	if(node.constructor.name=="Array")
+	{
+		for (var i = 0; i < node.length; i++) 
+		{
+			harvest_ror_ids_from_node_function(node[i])
+		}
+	}
+	if(node.constructor.name=="Object")
+	{
+		for (const [key, value] of Object.entries(node)) 
+		{
+			ror_ids.push(key);
+			harvest_ror_ids_from_node_function(value);
+		}
+	}
+}
+
+function build_selection_from_node_function(node,level)
+{
+// Attention : fonction récursive
+// cette fonction fabrique la partie ror du formulaire
+	if(node.constructor.name=="Array")
+	{
+// les données sont systématiquement, à chaque niveau (au premier niveau de chaque niveau), dans 
+// une array, donc on passe en revue et on relance la fonction
+		for (var i = 0; i < node.length; i++) 
+		{
+			build_selection_from_node_function(node[i],level)
+		}
+	}
+	else
+	{
+// Ce n'est pas une array = on ne se trouve pas au premier niveau de chaque niveau
+// Deux cas possible : objet ou string
+		if(node.constructor.name=="Object")
+		{
+// C'est le cas où il y encore des sous-niveau. 
+// On fait deux choses
+// 1) On stocke ce que l'on doit stocker
+// 2) on relance la fonction
+			level++;
+			for (const [key, value] of Object.entries(node)) 
+			{
+
+				var provisional_text="";
+				var i=1;
+				while(i<level)
+				{
+					provisional_text+="\xA0\xA0\xA0";
+					i++;
+				}
+				if(ror_affiliations_data[key]!=undefined)
+				{
+					provisional_text+=ror_affiliations_data[key]["label"];
+				}
+				else
+				{
+					provisional_text+="unknown";
+				}
+				var option = document.createElement("option");
+				option.text = provisional_text;
+				option.value = key;
+				selection.appendChild(option);
+				build_selection_from_node_function(value,level)
+			}
+		}
+		if(node.constructor.name=="String")
+		{
+// C'est le cas où il n'y a plus de sous-niveau. Une seule chose à faire : stocker ce que l'on 
+// doit stocker
+			level++;
+			var provisional_text="";
+			var i=1;
+			while(i<level)
+			{
+				provisional_text+="\xA0\xA0\xA0";
+				i++;
+			}
+			provisional_text+=ror_affiliations_data[node]["label"];
+			var option = document.createElement("option");
+			option.text = provisional_text;
+			option.value = node;
+			selection.appendChild(option);
+		}
+	}
+}
+
+
+function get_node_function(one_ror_affiliation_id,node)
+{
+// Attention : fonction récursive
+
+// va chercher les informations de descendance d'une affiliation précise (one_ror_affiliation_id)
+// et les place dans ror_affiliations_tree_step_two
+	if(node.constructor.name=="Array")
+	{
+		for (var i = 0; i < node.length; i++) 
+		{
+			get_node_function(one_ror_affiliation_id,node[i])
+		}
+	}
+	if(node.constructor.name=="Object")
+	{
+		for (const [key, value] of Object.entries(node)) 
+		{
+			if (key==one_ror_affiliation_id)
+			{
+				ror_affiliations_tree_step_two.push({[key]:value});
+				break;
+			}
+			else
+			{
+				get_node_function(one_ror_affiliation_id,value)
+			}
+		}
+	}
+	if(node.constructor.name=="String")
+	{
+		if (node==one_ror_affiliation_id)
+		{
+			ror_affiliations_tree_step_two.push(node);
+//			break;
+		}
+	}
+}
+
+
+function show_graph_function(one_set_of_values,one_set_of_labels,one_title)
+{
+	var data = [
+	{
+		values: one_set_of_values,
+		labels: one_set_of_labels,
+		hoverinfo: 'label+percent+value',
+		hole: .4,
+		type: 'pie'
+	}
+	];
+
+	var layout = 
+	{
+		title: one_title,
+//		title: one_title+'<br>'+one_title,
+		subtitle: "subtitle",
+		text: "text",
+		annotations: [
+			{
+			font: 
+				{
+					size: 20
+				},
+				showarrow: false,
+				text: '',
+				x: 0.17,
+				y: 0.5
+			}
+		],
+		font: 
+		{
+			size: 12
+		},
+		height:Number(screen.height)/2,
+		width:Number(screen.width)/2,
+		showlegend: true,
+		grid: {rows: 1, columns: 2}
+	};
+
+
+	TESTER = document.getElementById('graph_container');
+	Plotly.newPlot( TESTER, data, layout);
+	document.getElementById('graph_spot').style.display="block";
+}
+
+
+function hide_graph_function()
+{
+	document.getElementById('graph_container').innerHTML="";
+	document.getElementById('graph_spot').style.display="none";
+}
+</script>
+
+</body>
+</html>
