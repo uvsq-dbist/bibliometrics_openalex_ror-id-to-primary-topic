@@ -1,13 +1,11 @@
 # check_dois_in_hal
 <h1>Vérification de la présence de DOIs dans Hal, par lot</h1>
 <h2>En un mot</h2>
-L'objectif de l'outil est de pointer, parmi un <b>lot</b> de DOIs stockés dans un fichier .csv, ceux  qui sont <b>absents</b> de Hal. 
-<br/>
-Il est destiné à des administrateurs Hal
-<br/>
-Il est construit sur les API ROR et OpenAlex
-<br/>
-Il a été testé avec en entrée un fichier .csv contenant 1000 DOIs. Temps de traitement dans ce cas : environ 2.30 minutes
+L'objectif de l'outil est de se faire une idée des sujets travaillées par un laboratoire
+<br/><br/>
+La source est OpenAlex. A chaque notice d’OpenAlex est attribué automatiquement un sujet et un seul, le “primary topic”, qui comporte quatre niveaux de précisions
+<br/><br/>
+La façon dont les articles d’un laboratoire dans OpenAlex se distribuent selon les primary topics est réputé ici donner une image des sujets travaillés par ce laboratoire
 <h2>Utilisation</h2>
 Sur la page d'accueil l’utilisateur est invité à uploader un fichier .csv contenant une colonne de DOIs
 <br/>
