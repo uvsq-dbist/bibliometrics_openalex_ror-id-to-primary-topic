@@ -27,9 +27,25 @@ L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'h
 <br/><br/>
 Il met en oeuvre l'outil de visualisation Plotly : https://plotly.com/
 <h2>Fonctionnalités, fonctions</h2>
-La fonction upload_files_function() sert à uploader le fichier<br/>
-A l'intérieur de cette fonction, la fonction csv_to_array_function() sert à nettoyer les données entrantes afin qu'à la fin de chaque ligne il y ait un \r et rien d'autre<br/>
-La fonction download_file_function() sert à downloader le fichier de résultat<br/>
-A l'intériure de cette fonction, la fonction array_to_csv_function() transforme l'array dans laquelle ont été stockés les résultats (dois_missing_in_hal) en une chaîne de caractère qui sera comprise comme un .csv à une seule colonne : des données séparées par un \n\r, ie un passage à la ligne<br/>
-La fonction get_hal_data_function() prend une array de DOIs en entrée, les passe en revue via un while et, chaque fois, interroge l'API Hal à la recherche de la donnée "response" >>> "numFound". Si cette donnée est à zéro, cela signifie que le DOI n'est pas dans Hal, et donc mérite d'êtres stocké (dans l'array dois_missing_in_hal). A noter, le while mis en oeuvre ici est ralenti par la commande await new Promise(r => setTimeout(r, 10)); : on attend un centième de seconde avant de lancer un nouvelle commande fetch
+La fonction get_ror_affiliation_data_function() (récursive) permet la construction d’un objet ror_affiliations_tree_step_one qui contient toute l'arborescence ROR d’une institution de départ (ror_origin_id)
+<br/><br/>
+A partir de là, la fonction build_selection_from_node_function() (récursive) fabrique la partie ror du formulaire présenté à l’utilisateur
+<br/><br/>
+Tout le reste est déclenché par un click sur le bouton "lancer" de ce formulaire.
+<br/><br/>
+Ce click active la fonction launch_openalex_function() qui à son tour active la fonction get_node_function() (récursive) qui, à partir de ror_affiliations_tree_step_one (l'aborescence des ror) construit ror_affiliations_tree_step_two (l'aborescence des ror à partir du ror sélectionné par l’utilisateur)
+<br/><br/>
+Ensuite harvest_ror_ids_from_node_function() (récursive) attrape tous les identifiants ROR contenus dans ror_affiliations_tree_step_two et les places dans une array, ror_ids
+<br/><br/>
+Ensuite launch_openalex_function() envoie, selon ce qu'à tické l'utilisateur, 
+la fonction get_openalex_data_thru_affiliation_strings_function() ou la fonction get_openalex_data_thru_ror_ids_function() 
+ou les deux fonctions
+<br/><br/>
+Ces fonctions vont chercher les données dans OpenAlex. Elles se comportent de la même façon : A chaque résultat trouvé, elles déclenchent  la fonction can_data_function() qui nourrit deux array (openalex_ids et openalex_sorting) et un objet (openalex_data) destinés à stocker les résultats
+<br/><br/>
+Quand l’examen est terminé, envoi de la fonction launch_ending_function() qui met en ordre alphabétique de titre openalex_sorting, puis envoie 
+display_openalex_data_function() qui effectue l'affichage des résultats
+<br/><br/>
+Les dernières fonctions (peek_a_boo_function_01(), peek_a_boo_function_02(), build_openalex_display_function(), breakup_function(), show_graph_function(), hide_graph_function() gèrent l’affichage des graphes
+
 # bibliometrics_openalex_ror-id-to-primary-topic
