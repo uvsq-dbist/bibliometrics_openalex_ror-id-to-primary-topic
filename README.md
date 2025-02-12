@@ -17,7 +17,7 @@ Dès que le choix du fichier est fait, le processus s’enclenche. A la fin du p
 HTML, JavaScript<br/>
 N'importe quel browser permet d'utiliser le code
 <h2>Fichiers</h2>
-Pour permettre une instalation la plus facile possible tout le code (toutes les fonctions) se trouve dans un seul fichier, upload_dois_and_check_against_hal.html
+Pour permettre une instalation la plus facile possible tout le code (toutes les fonctions) se trouve dans un seul fichier, ror_affiliations_to_openalex_primary_topics.html
 <h2>Dépendance</h2>
 L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'hui (février 2025) avec les points d'entrée https://api.ror.org/organizations/ et https://api.openalex.org/works
 <h2>Fonctionnalités, fonctions</h2>
