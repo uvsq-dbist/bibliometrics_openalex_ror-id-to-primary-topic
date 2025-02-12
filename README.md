@@ -7,18 +7,25 @@ La source est OpenAlex. A chaque notice d’OpenAlex est attribué automatiqueme
 <br/><br/>
 La façon dont les articles d’un laboratoire dans OpenAlex se distribuent selon les primary topics est réputé ici donner une image des sujets travaillés par ce laboratoire
 <h2>Utilisation</h2>
-Sur la page d'accueil l’utilisateur est invité à uploader un fichier .csv contenant une colonne de DOIs
-<br/>
-Dès que le choix du fichier est fait, le processus s’enclenche. A la fin du processus, l’utilisateur peut décharger les DOIs manquants dans Hal sous la forme d’un fichier .csv
-<br/>
+L’utilisateur se voit présenter l’arborescence ROR de l’Université de Versailles Saint Quentin en Yvelines
+<br/><br/>
+Mais il peut choisir une autre institution et à ce moment là ce sera l’arborescence ROR de cette institution qui lui sera présentée
+<br/><br/>
+Il choisit n’importe quel item de cette arborescence, une fourchette d’années, ainsi que les éléments de recherche (numéro ROR, nom, sigle, etc.). Il lui est alors présenté le nombre d’articles OpenAlex correspondant à sa demande selon chacun des primary topics de premier niveau
+<br/><br/>
+Il peut développer pour afficher les primary topics de deuxième, troisième et quatrième niveau
+<br/><br/>
+Si le nombre d'articles est supérieur à une certaine limite, il peut afficher un graphe en anneau.
+fichier .csv
 <h2>Langage</h2>
-HTML, JavaScript<br/>
+HTML, JavaScript
+<br/><br/>
 N'importe quel browser permet d'utiliser le code
 <h2>Fichiers</h2>
 Pour permettre une instalation la plus facile possible tout le code (toutes les fonctions) se trouve dans un seul fichier, ror_affiliations_to_openalex_primary_topics.html
 <h2>Dépendance</h2>
 L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'hui (février 2025) avec les points d'entrée https://api.ror.org/organizations/ et https://api.openalex.org/works
-<br/>
+<br/><br/>
 Il met en oeuvre l'outil de visualisation Plotly : https://plotly.com/
 <h2>Fonctionnalités, fonctions</h2>
 La fonction upload_files_function() sert à uploader le fichier<br/>
