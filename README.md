@@ -20,7 +20,7 @@ N'importe quel browser permet d'utiliser le code
 Pour permettre une instalation la plus facile possible tout le code (toutes les fonctions) se trouve dans un seul fichier, ror_affiliations_to_openalex_primary_topics.html
 <h2>Dépendance</h2>
 L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'hui (février 2025) avec les points d'entrée https://api.ror.org/organizations/ et https://api.openalex.org/works
-<p/>
+<br/>
 Il met en oeuvre l'outil de visualisation Plotly : https://plotly.com/
 <h2>Fonctionnalités, fonctions</h2>
 La fonction upload_files_function() sert à uploader le fichier<br/>
