@@ -1,7 +1,7 @@
 # ror_affiliations_to_openalex_primary_topics.html
 <h1>sujets travaillées par un laboratoire selon OpenAlex</h1>
 <h2>En un mot</h2>
-L'objectif de l'outil est de se faire une idée des sujets travaillées par un laboratoire
+L'objectif de l'outil est de se faire une idée des sujets travaillés par un laboratoire
 <br/><br/>
 La source est OpenAlex. A chaque notice d’OpenAlex est attribué automatiquement un sujet et un seul, le “primary topic”, qui comporte quatre niveaux de précisions
 <br/><br/>
