@@ -46,6 +46,6 @@ Ces fonctions vont chercher les données dans OpenAlex. Elles se comportent de l
 Quand l’examen est terminé, envoi de la fonction launch_ending_function() qui met en ordre alphabétique de titre openalex_sorting, puis envoie 
 display_openalex_data_function() qui effectue l'affichage des résultats
 <br/><br/>
-Les dernières fonctions (peek_a_boo_function_01(), peek_a_boo_function_02(), build_openalex_display_function(), breakup_function(), show_graph_function(), hide_graph_function() gèrent l’affichage des graphes
+Les dernières fonctions (peek_a_boo_function_01(), peek_a_boo_function_02(), build_openalex_display_function(), breakup_function(), show_graph_function(), hide_graph_function()) gèrent l’affichage des graphes
 
 # bibliometrics_openalex_ror-id-to-primary-topic
