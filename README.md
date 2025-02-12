@@ -5,7 +5,7 @@ L'objectif de l'outil est de pointer, parmi un <b>lot</b> de DOIs stockés dans 
 <br/>
 Il est destiné à des administrateurs Hal
 <br/>
-Il est construit sur l'API Hal
+Il est construit sur les API ROR et OpenAlex
 <br/>
 Il a été testé avec en entrée un fichier .csv contenant 1000 DOIs. Temps de traitement dans ce cas : environ 2.30 minutes
 <h2>Utilisation</h2>
@@ -19,8 +19,7 @@ N'importe quel browser permet d'utiliser le code
 <h2>Fichiers</h2>
 Pour permettre une instalation la plus facile possible tout le code (toutes les fonctions) se trouve dans un seul fichier, upload_dois_and_check_against_hal.html
 <h2>Dépendance</h2>
-L'outil est dépendant de l'API Hal telle qu'elle existe aujourd'hui (décembre 2024) avec le point d'entrée https://api.archives-ouvertes.fr/search<br/>
-La documentation de l'API Hal : <a href='https://api.archives-ouvertes.fr/docs/search' target='_blank'>https://api.archives-ouvertes.fr/docs/search</a>
+L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'hui (février 2025) avec les points d'entrée https://api.ror.org/organizations/ et https://api.openalex.org/works
 <h2>Fonctionnalités, fonctions</h2>
 La fonction upload_files_function() sert à uploader le fichier<br/>
 A l'intérieur de cette fonction, la fonction csv_to_array_function() sert à nettoyer les données entrantes afin qu'à la fin de chaque ligne il y ait un \r et rien d'autre<br/>
