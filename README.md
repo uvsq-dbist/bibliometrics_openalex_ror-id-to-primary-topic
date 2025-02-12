@@ -1,5 +1,5 @@
-# check_dois_in_hal
-<h1>Vérification de la présence de DOIs dans Hal, par lot</h1>
+# ror_affiliations_to_openalex_primary_topics.html
+<h1>sujets travaillées par un laboratoire selon OpenAlex</h1>
 <h2>En un mot</h2>
 L'objectif de l'outil est de se faire une idée des sujets travaillées par un laboratoire
 <br/><br/>
