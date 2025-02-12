@@ -26,7 +26,7 @@ Pour permettre une instalation la plus facile possible tout le code (toutes les 
 L'outil est dépendant des API ROR et OpenAlex telle qu'elles existent aujourd'hui (février 2025) avec les points d'entrée https://api.ror.org/organizations/ et https://api.openalex.org/works
 <br/><br/>
 Il met en oeuvre l'outil de visualisation Plotly : https://plotly.com/
-<h2>Fonctionnalités, fonctions</h2>
+<h2>Fonctionnement, fonctions</h2>
 La fonction get_ror_affiliation_data_function() (récursive) permet la construction d’un objet ror_affiliations_tree_step_one qui contient toute l'arborescence ROR d’une institution de départ (ror_origin_id)
 <br/><br/>
 A partir de là, la fonction build_selection_from_node_function() (récursive) fabrique la partie ror du formulaire présenté à l’utilisateur
