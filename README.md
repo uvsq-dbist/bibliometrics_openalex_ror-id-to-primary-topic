@@ -16,7 +16,6 @@ Il choisit n’importe quel item de cette arborescence, une fourchette d’anné
 Il peut développer pour afficher les primary topics de deuxième, troisième et quatrième niveau
 <br/><br/>
 Si le nombre d'articles est supérieur à une certaine limite, il peut afficher un graphe en anneau.
-fichier .csv
 <h2>Langage</h2>
 HTML, JavaScript
 <br/><br/>
