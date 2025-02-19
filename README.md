@@ -1,6 +1,7 @@
 # ror_affiliations_to_openalex_primary_topics.html
+<a id='english'></a>
 <h1>topics covered by a laboratory according to OpenAlex</h1>
-
+<a href='#francais'>en français</a>
 <h2>In a nutshell</h2>
 
 The goal of the tool is to get an idea of ​​the topics covered by a laboratory
@@ -59,8 +60,9 @@ The last functions (peek_a_boo_function_01(), peek_a_boo_function_02(), build_op
 <hr/>
 
 
-
+<a id='francais'></a>
 <h1>sujets travaillées par un laboratoire selon OpenAlex</h1>
+<a href='#english'>in English</a>
 <h2>En un mot</h2>
 L'objectif de l'outil est de se faire une idée des sujets travaillés par un laboratoire
 <br/><br/>
