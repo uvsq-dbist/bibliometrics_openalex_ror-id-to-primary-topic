@@ -1,4 +1,65 @@
 # ror_affiliations_to_openalex_primary_topics.html
+<h1>topics covered by a laboratory according to OpenAlex</h1>
+
+<h2>In a nutshell</h2>
+
+The goal of the tool is to get an idea of ​​the topics covered by a laboratory
+<br/><br/>
+The source is OpenAlex. Each OpenAlex notice is automatically assigned one so-called “primary topic” and one only. A “primary topic” has four levels of precision
+<br/><br/>
+The way OpenAlex assigns the primary topics is supposed by us to represent the topics covered by the laboratory
+
+<h2>Use</h2>
+
+The user is presented with the ROR affiliation tree of the University of Versailles Saint Quentin en Yvelines
+<br/><br/>
+But he can choose another institution and then it will be the ROR affiliation tree of this institution that will be presented to him
+<br/><br/>
+He has to choose one item from this tree, a range of years, and the search elements (ROR number, name, acronym, etc.). He is then presented with the number of OpenAlex articles corresponding to his request distributed along the first-level primary topics
+<br/><br/>
+He can display the second, third and fourth-level primary topics
+<br/><br/>
+If the number of articles is greater than a certain limit, a doughnut graph can be displayed.
+
+<h2>Language</h2>
+
+HTML and JavaScript
+<br/><br/>
+Any browser can run the code
+
+<h2>Files</h2>
+
+To allow the easiest possible installation, all the code (all functions) is in one single file, ror_affiliations_to_openalex_primary_topics.html
+
+<h2>Dependencies</h2>
+
+The tool is dependent on the ROR and OpenAlex APIs as they exist today (February 2025). The entry points : https://api.ror.org/organizations/ and https://api.openalex.org/works
+<br/><br/>
+It makes use of the Plotly visualization tool: https://plotly.com/
+
+<h2>Operation, functions</h2>
+
+The get_ror_affiliation_data_function() function (recursive) allows the construction of a ror_affiliations_tree_step_one object that contains the entire ROR tree of an institution (ror_origin_id)
+<br/><br/>
+From there, the function build_selection_from_node_function() (recursive) builds the ror selection presented to the user in the main form
+<br/><br/>
+Everything else is triggered by a click on the "launch" button of this form.
+<br/><br/>
+This click activates the launch_openalex_function() which in turn activates the get_node_function() which, from the ror_affiliations_tree_step_one object (the ror tree) builds the ror_affiliations_tree_step_two object (the ror tree reduced to the ror selected by the user)
+<br/><br/>
+Then harvest_ror_ids_from_node_function() grabs all the ROR identifiers contained in ror_affiliations_tree_step_two and places them in an array, ror_ids
+<br/><br/>
+Then launch_openalex_function() sends, depending on what the user ticked, the get_openalex_data_thru_affiliation_strings_function() or the get_openalex_data_thru_ror_ids_function() or both functions
+<br/><br/>
+These functions will fetch the data from OpenAlex. They behave in the same way: For each result found, they trigger the can_data_function() function which feeds two arrays (openalex_ids and openalex_sorting) and an object (openalex_data) intended to store the results
+<br/><br/>
+When the examination is finished, the launch_ending_function() is sent which puts openalex_sorting in alphabetical order by title, then sends display_openalex_data_function() which displays the results
+<br/><br/>
+The last functions (peek_a_boo_function_01(), peek_a_boo_function_02(), build_openalex_display_function(), breakup_function(), show_graph_function(), hide_graph_function()) manage the display of the graphs
+<hr/>
+
+
+
 <h1>sujets travaillées par un laboratoire selon OpenAlex</h1>
 <h2>En un mot</h2>
 L'objectif de l'outil est de se faire une idée des sujets travaillés par un laboratoire
